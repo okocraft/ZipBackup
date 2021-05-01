@@ -1,0 +1,12 @@
+backup:
+  directory: ""
+  zip-compression-level: "NORMAL"
+  plugin:
+    interval: 60
+    exclude-folders: []
+  world:
+    interval: 60
+    exclude-worlds: []
+  purge:
+    check-interval: 720
+    expiration-days: 7
