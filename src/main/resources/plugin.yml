@@ -1,0 +1,8 @@
+name: "ZipBackup"
+main: net.okocraft.zipbackup.ZipBackupPlugin
+version: ${project.version}
+author: "Siroshun09"
+api-version: "1.16"
+commands:
+  zipbackup:
+    aliases: ["zb", "zbu", "zbackup"]
