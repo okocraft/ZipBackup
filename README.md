@@ -1,8 +1,8 @@
 # ZipBackup
 
-![GitHub release (latest SemVer)](https:#img.shields.io/github/v/release/okocraft/ZipBackup)
-![GitHub Workflow Status](https:#img.shields.io/github/workflow/status/okocraft/ZipBackup/Java%20CI)
-![GitHub](https:#img.shields.io/github/license/okocraft/ZipBackup)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/okocraft/ZipBackup)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/okocraft/ZipBackup/Java%20CI)
+![GitHub](https://img.shields.io/github/license/okocraft/ZipBackup)
 
 ワールドやプラグインを自動でバックアップする Paper プラグインです。
 
