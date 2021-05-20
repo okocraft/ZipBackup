@@ -41,12 +41,15 @@ backup:
   zip-compression-level: "NORMAL" # 圧縮レベル。FASTEST, FAST, NORMAL, MAXIMUM, ULTRA 
   plugin: # プラグインフォルダーのバックアップ設定
     interval: 60 # バックアップ間隔(分) 0以下でバックアップしない
+    backup-after-startup: true # サーバースタート直後にバックアップするか
     exclude-folders: [] # 除外するフォルダー名 / ファイル名
   world: # ワールドのバックアップ設定
     interval: 60 # バックアップ間隔(分) 0以下でバックアップしない 
+    backup-after-startup: true # サーバースタート直後にバックアップするか
     exclude-worlds: [] # 除外するワールドの名前
-  purge: # 自動削除設定。プラグイン起動時に必ず実行される。
+  purge: # 自動削除設定
     check-interval: 720 # 期限切れのバックアップを確認する間隔(分) 0以下で起動後実行しない。
+    purge-after-startup: true # サーバースタート直後に確認するか
     expiration-days: 7 # バックアップの期限 (日)
 ```
 
@@ -56,12 +59,15 @@ backup:
   zip-compression-level: "NORMAL" # Compression level: FASTEST, FAST, NORMAL, MAXIMUM, ULTRA 
   plugin: # Backup settings for the plugin folder
     interval: 60 # Backup interval (minutes), no backup below 0
+    backup-after-startup: true # Backup when server has been started
     exclude-folders: [] # Folder/file name to exclude
   world: # Backup settings for worlds
-    interval: 60 # Backup interval (minutes) no backup below 0 
+    interval: 60 # Backup interval (minutes) no backup below 0
+    backup-after-startup: true # Backup when server has been started
     exclude-worlds: [] # Name of worlds to exclude.
-  purge: # Automatic deletion setting. Always executed when the plugin starts.
+  purge: # Automatic deletion setting
     check-interval: 720 # Interval to check for expired backups (minutes), not executed after startup if less than 0.
+    purge-after-startup: true # Purge when server has been started
     expiration-days: 7 # Backup expiration (days)
 ```
 
