@@ -7,6 +7,7 @@ import com.github.siroshun09.mccommand.paper.PaperCommandFactory;
 import net.lingala.zip4j.model.ZipParameters;
 import net.okocraft.zipbackup.command.ZipBackupCommand;
 import net.okocraft.zipbackup.config.Settings;
+import net.okocraft.zipbackup.listener.ServerStartListener;
 import net.okocraft.zipbackup.task.TaskContainer;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,8 @@ public class ZipBackupPlugin extends JavaPlugin {
             );
             getServer().getPluginManager().disablePlugin(this);
         }
+
+        getServer().getPluginManager().registerEvents(new ServerStartListener(this), this);
 
         Optional.ofNullable(getCommand("zipbackup"))
                 .ifPresent(command -> PaperCommandFactory.register(command, new ZipBackupCommand(this)));

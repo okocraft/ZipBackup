@@ -3,10 +3,13 @@ backup:
   zip-compression-level: "NORMAL"
   plugin:
     interval: 60
+    backup-after-startup: true
     exclude-folders: []
   world:
     interval: 60
+    backup-after-startup: true
     exclude-worlds: []
   purge:
     check-interval: 720
+    purge-after-startup: true
     expiration-days: 7

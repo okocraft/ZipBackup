@@ -32,7 +32,7 @@ public class TaskContainer {
         if (0 < purgeInterval) {
             scheduler.scheduleAtFixedRate(
                     new BackupPurgeTask(plugin),
-                    1,
+                    purgeInterval,
                     purgeInterval,
                     TimeUnit.MINUTES
             );
