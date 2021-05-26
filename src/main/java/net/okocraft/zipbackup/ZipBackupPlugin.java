@@ -13,7 +13,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.logging.Level;
 
 public class ZipBackupPlugin extends JavaPlugin {
@@ -41,8 +40,7 @@ public class ZipBackupPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new ServerStartListener(this), this);
 
-        Optional.ofNullable(getCommand("zipbackup"))
-                .ifPresent(command -> PaperCommandFactory.register(command, new ZipBackupCommand(this)));
+        PaperCommandFactory.registerIfExists(this, new ZipBackupCommand(this));
     }
 
     @Override
