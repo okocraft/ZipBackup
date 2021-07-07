@@ -90,9 +90,10 @@ public class TaskContainer {
         );
     }
 
-    public void shutdown() {
-        if (scheduler != null) {
+    public void shutdownIfRunning() {
+        if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdownNow();
+            scheduler = null;
         }
     }
 }
