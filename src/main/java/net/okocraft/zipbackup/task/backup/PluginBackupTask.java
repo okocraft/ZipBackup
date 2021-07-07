@@ -13,13 +13,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class PluginBackupTask implements Runnable {
-
-    private static final DateTimeFormatter FILENAME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
 
     private final ZipBackupPlugin plugin;
     private final Path directoryPathCache;
