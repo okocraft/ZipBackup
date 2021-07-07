@@ -1,6 +1,6 @@
 package net.okocraft.zipbackup.task.backup;
 
-import com.github.siroshun09.configapi.common.util.FileUtils;
+import com.github.siroshun09.configapi.api.util.FileUtils;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
