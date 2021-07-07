@@ -40,7 +40,7 @@ public class ZipBackupPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new ServerStartListener(this), this);
 
-        PaperCommandFactory.registerIfExists(this, new ZipBackupCommand(this));
+        PaperCommandFactory.registerAsyncIfExists(this, new ZipBackupCommand(this));
     }
 
     @Override
