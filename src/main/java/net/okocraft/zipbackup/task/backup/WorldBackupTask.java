@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -18,6 +19,7 @@ import java.util.logging.Level;
 public class WorldBackupTask implements Runnable {
 
     private static final String SESSION_FILE_NAME = "session.lock";
+    private static final String OLD_FILE_SUFFIX = "_old";
 
     private final ZipBackupPlugin plugin;
 
@@ -78,7 +80,7 @@ public class WorldBackupTask implements Runnable {
         var zipPath = FilePathFactory.newBackupFile(directory);
         var zip = new ZipFile(zipPath.toFile());
         var parameters = new ZipParameters(plugin.getZipParameters());
-        parameters.setExcludeFileFilter(file -> file.getName().equals(SESSION_FILE_NAME));
+        parameters.setExcludeFileFilter(WorldBackupTask::shouldBeIgnored);
 
         try {
             zip.addFolder(world.getWorldFolder(), parameters);
@@ -89,5 +91,10 @@ public class WorldBackupTask implements Runnable {
                     exception
             );
         }
+    }
+
+    private static boolean shouldBeIgnored(@NotNull File file) {
+        var name = file.getName();
+        return name.equals(SESSION_FILE_NAME) || name.endsWith(OLD_FILE_SUFFIX);
     }
 }
