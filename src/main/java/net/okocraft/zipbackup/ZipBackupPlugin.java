@@ -45,7 +45,7 @@ public class ZipBackupPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        taskContainer.shutdown();
+        taskContainer.shutdownIfRunning();
     }
 
     public void reload() throws Exception {
@@ -58,6 +58,7 @@ public class ZipBackupPlugin extends JavaPlugin {
 
         prepareZipParameters();
 
+        taskContainer.shutdownIfRunning();
         taskContainer.scheduleTasks();
     }
 
