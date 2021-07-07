@@ -1,7 +1,7 @@
 package net.okocraft.zipbackup;
 
-import com.github.siroshun09.configapi.common.util.FileUtils;
-import com.github.siroshun09.configapi.common.util.ResourceUtils;
+import com.github.siroshun09.configapi.api.util.FileUtils;
+import com.github.siroshun09.configapi.api.util.ResourceUtils;
 import com.github.siroshun09.configapi.yaml.YamlConfiguration;
 import com.github.siroshun09.mccommand.paper.PaperCommandFactory;
 import net.lingala.zip4j.model.ZipParameters;

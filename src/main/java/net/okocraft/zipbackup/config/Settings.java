@@ -1,6 +1,6 @@
 package net.okocraft.zipbackup.config;
 
-import com.github.siroshun09.configapi.common.value.ConfigValue;
+import com.github.siroshun09.configapi.api.value.ConfigValue;
 import net.lingala.zip4j.model.enums.CompressionLevel;
 
 import java.util.List;
