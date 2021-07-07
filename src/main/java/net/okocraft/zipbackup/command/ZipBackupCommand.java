@@ -9,6 +9,7 @@ import com.github.siroshun09.mccommand.common.filter.StringFilter;
 import net.okocraft.zipbackup.ZipBackupPlugin;
 import net.okocraft.zipbackup.command.subcommand.BackupCommand;
 import net.okocraft.zipbackup.command.subcommand.PurgeCommand;
+import net.okocraft.zipbackup.command.subcommand.ReloadCommand;
 import net.okocraft.zipbackup.message.Messages;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +27,8 @@ public class ZipBackupCommand extends AbstractCommand {
         this.subCommandHolder =
                 SubCommandHolder.of(
                         new BackupCommand(plugin),
-                        new PurgeCommand(plugin)
+                        new PurgeCommand(plugin),
+                        new ReloadCommand(plugin)
                 );
     }
 

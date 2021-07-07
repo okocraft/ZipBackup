@@ -49,6 +49,13 @@ public final class Messages {
     public static final Component COMMAND_BACKUP_WORLD_UNKNOWN =
             text("Unknown world: ", RED);
 
+    public static final Component COMMAND_RELOAD_START = text("Reloading backup plugin...", GRAY);
+
+    public static final Component COMMAND_RELOAD_SUCCESS = text("Successfully reloaded the plugin.", AQUA);
+
+    public static final Component COMMAND_RELOAD_FAILURE =
+            text("Failed to reload the plugin. Please check your console.", RED);
+
     public Messages() {
         throw new UnsupportedOperationException();
     }
