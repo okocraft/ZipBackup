@@ -141,10 +141,6 @@
                             <pattern>com.github.siroshun09</pattern>
                             <shadedPattern>${project.groupId}.lib</shadedPattern>
                         </relocation>
-                        <relocation>
-                            <pattern>org.yaml</pattern>
-                            <shadedPattern>${project.groupId}.lib.yaml</shadedPattern>
-                        </relocation>
                     </relocations>
                 </configuration>
                 <executions>
