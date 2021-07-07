@@ -50,11 +50,7 @@ public class ZipBackupPlugin extends JavaPlugin {
 
     public void reload() throws Exception {
         FileUtils.createDirectoriesIfNotExists(getDataFolder().toPath());
-        ResourceUtils.copyFromClassLoaderIfNotExists(
-                getClassLoader(),
-                "config.yml",
-                getDataFolder().toPath().resolve("config.yml")
-        );
+        ResourceUtils.copyFromJar(getFile().toPath(), "config.yml", configuration.getPath());
 
         configuration.reload();
 
