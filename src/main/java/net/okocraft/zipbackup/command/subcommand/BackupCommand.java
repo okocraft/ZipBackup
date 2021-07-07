@@ -101,8 +101,10 @@ public class BackupCommand extends AbstractCommand {
         if (arguments.size() < 3) {
             sender.sendMessage(Messages.COMMAND_BACKUP_WORLD_START);
 
-            plugin.getTaskContainer().runWorldBackupTask()
+            plugin.getTaskContainer()
+                    .runWorldBackupTask()
                     .thenRun(() -> sender.sendMessage(Messages.COMMAND_BACKUP_WORLD_FINISH));
+            return CommandResult.SUCCESS;
         }
 
         var thirdArgument = arguments.get(2).get();
