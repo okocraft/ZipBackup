@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 public class BackupCommand extends AbstractCommand {
 
-    private static final Set<String> SECOND_ARGUMENTS = Set.of("plugin", "world");
+    private static final Set<String> SECOND_ARGUMENTS = Set.of("all", "plugin", "world");
     private final ZipBackupPlugin plugin;
 
     public BackupCommand(@NotNull ZipBackupPlugin plugin) {
@@ -47,6 +47,8 @@ public class BackupCommand extends AbstractCommand {
         var secondArgument = arguments.get(1);
 
         switch (secondArgument.get().toLowerCase()) {
+            case "all":
+                return backupAll(sender);
             case "plugin":
                 return backupPlugin(sender);
             case "world":
@@ -86,6 +88,16 @@ public class BackupCommand extends AbstractCommand {
         }
 
         return Collections.emptyList();
+    }
+
+    private @NotNull CommandResult backupAll(@NotNull Sender sender) {
+        var pluginResult = backupPlugin(sender);
+
+        if (pluginResult != CommandResult.SUCCESS) {
+            return pluginResult;
+        }
+
+        return backupWorld(sender, Collections.emptyList());
     }
 
     private @NotNull CommandResult backupPlugin(@NotNull Sender sender) {
