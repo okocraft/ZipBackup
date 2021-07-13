@@ -45,4 +45,6 @@ public final class Settings {
     public static final ConfigValue<Integer> BACKUP_PURGE_EXPIRATION_DAYS =
             config -> config.getInteger("backup.purge.expiration-days", 7);
 
+    public static final ConfigValue<Integer> BACKUP_PURGE_MAXIMUM_FILES =
+            config -> config.getInteger("backup.purge.maximum-files", 10);
 }
