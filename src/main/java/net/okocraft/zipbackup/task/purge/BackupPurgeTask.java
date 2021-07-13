@@ -28,6 +28,7 @@ public class BackupPurgeTask implements Runnable {
         }
 
         plugin.getLogger().info("Starting delete expired backups task...");
+        long start = System.currentTimeMillis();
         var deleted = new AtomicInteger(0);
 
         try (var list = Files.list(plugin.getBackupDirectory())) {
@@ -42,11 +43,15 @@ public class BackupPurgeTask implements Runnable {
             );
         }
 
-        if (deleted.intValue() == 0) {
-            plugin.getLogger().info("No expired files has been deleted.");
-        } else {
-            plugin.getLogger().info("Expired files has been deleted. (" + deleted.get() + ")");
-        }
+        long end = System.currentTimeMillis();
+
+        var log =
+                deleted.intValue() == 0 ?
+                        "No expired files has been deleted." :
+                        "Expired files (" + deleted.get() + ") has been deleted.";
+
+        System.out.println(log + " (" + (end - start) + "ms)");
+
     }
 
     private int checkBackups(@NotNull Path directory) {
