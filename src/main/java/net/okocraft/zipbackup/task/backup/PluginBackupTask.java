@@ -80,11 +80,17 @@ public class PluginBackupTask implements Runnable {
 
         excludedSet.add(plugin.getBackupDirectory().toFile());
 
+        var shouldIgnoreJar = plugin.getConfiguration().get(Settings.BACKUP_PLUGIN_IGNORE_JAR_FILES);
+
         return file -> {
             for (File excluded : excludedSet) {
                 if (excluded.equals(file)) {
                     return true;
                 }
+            }
+
+            if (shouldIgnoreJar) {
+                return file.getName().endsWith(".jar");
             }
 
             return false;

@@ -4,6 +4,7 @@ backup:
   plugin:
     interval: 60
     backup-after-startup: true
+    ignore-jar-files: false
     exclude-folders: []
   world:
     interval: 60

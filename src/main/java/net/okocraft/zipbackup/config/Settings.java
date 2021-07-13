@@ -24,6 +24,9 @@ public final class Settings {
     public static final ConfigValue<Boolean> BACKUP_PLUGIN_AFTER_START_UP =
             config -> config.getBoolean("backup.plugin.backup-after-startup", true);
 
+    public static final ConfigValue<Boolean> BACKUP_PLUGIN_IGNORE_JAR_FILES =
+            config -> config.getBoolean("backup.plugin.ignore-jar-files", false);
+
     public static final ConfigValue<List<String>> BACKUP_PLUGIN_EXCLUDE_FOLDERS =
             config -> config.getStringList("backup.plugin.exclude-folders");
 
