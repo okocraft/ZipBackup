@@ -50,7 +50,7 @@ public class BackupPurgeTask implements Runnable {
                         "No expired files has been deleted." :
                         "Expired files (" + deleted.get() + ") has been deleted.";
 
-        System.out.println(log + " (" + (end - start) + "ms)");
+        plugin.getLogger().info(log + " (" + (end - start) + "ms)");
     }
 
     private int checkBackups(@NotNull Path directory) {
