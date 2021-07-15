@@ -6,7 +6,7 @@
 
     <groupId>net.okocraft.zipbackup</groupId>
     <artifactId>zipbackup</artifactId>
-    <version>1.4</version>
+    <version>1.5</version>
 
     <name>ZipBackup</name>
     <url>https://github.com/okocraft/ZipBackup</url>
