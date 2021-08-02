@@ -54,10 +54,8 @@ public class PluginBackupTask implements Runnable {
             return;
         }
 
-        var zipFile = new ZipFile(zipPath.toFile());
-
-        try (var fileList = Files.list(pluginDirectory)) {
-            fileList.forEach(p -> addToZip(p, zipFile, zipParameter));
+        try (var zipFile = new ZipFile(zipPath.toFile())) {
+            zipFile.addFolder(pluginDirectory.toFile(), zipParameter);
         } catch (IOException exception) {
             plugin.getLogger().log(
                     Level.SEVERE,
@@ -95,24 +93,5 @@ public class PluginBackupTask implements Runnable {
 
             return false;
         };
-    }
-
-    private void addToZip(@NotNull Path path, @NotNull ZipFile target, @NotNull ZipParameters parameters) {
-        try {
-            if (Files.isRegularFile(path)) {
-                target.addFile(path.toFile(), parameters);
-                return;
-            }
-
-            if (Files.isDirectory(path)) {
-                target.addFolder(path.toFile(), parameters);
-            }
-        } catch (IOException exception) {
-            plugin.getLogger().log(
-                    Level.SEVERE,
-                    "An error occurred while adding to zip (" + path + ")",
-                    exception
-            );
-        }
     }
 }
