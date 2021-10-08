@@ -82,6 +82,13 @@
         </dependency>
     </dependencies>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven-snapshots</id>
+            <url>https://repository.apache.org/content/repositories/snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <build>
         <defaultGoal>clean package</defaultGoal>
 
@@ -123,7 +130,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.3.1-SNAPSHOT</version>
                 <configuration>
                     <finalName>${project.name}-${project.version}</finalName>
                     <filters>
@@ -134,8 +141,8 @@
                             </excludes>
                         </filter>
                     </filters>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                     <minimizeJar>true</minimizeJar>
-                    <shadedArtifactAttached>true</shadedArtifactAttached>
                     <relocations>
                         <relocation>
                             <pattern>com.github.siroshun09</pattern>
