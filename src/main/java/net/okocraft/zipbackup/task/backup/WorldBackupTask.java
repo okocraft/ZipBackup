@@ -50,18 +50,20 @@ public class WorldBackupTask implements Runnable {
     public static void backupWorld(@NotNull World world, @NotNull ZipBackupPlugin plugin) {
         var worldName = world.getName();
 
-        var mainThread = Bukkit.getScheduler().getMainThreadExecutor(plugin);
-        var saveTask = CompletableFuture.runAsync(world::save, mainThread);
+        if (plugin.getConfiguration().get(Settings.BACKUP_WORLD_SAVE_BEFORE_BACKUP)) {
+            var mainThread = Bukkit.getScheduler().getMainThreadExecutor(plugin);
+            var saveTask = CompletableFuture.runAsync(world::save, mainThread);
 
-        try {
-            saveTask.join();
-        } catch (Exception exception) {
-            plugin.getLogger().log(
-                    Level.SEVERE,
-                    "An error occurred while saving the world (" + worldName + ")",
-                    exception
-            );
-            return;
+            try {
+                saveTask.join();
+            } catch (Exception exception) {
+                plugin.getLogger().log(
+                        Level.SEVERE,
+                        "An error occurred while saving the world (" + worldName + ")",
+                        exception
+                );
+                return;
+            }
         }
 
         var directory = plugin.getBackupDirectory().resolve(worldName);

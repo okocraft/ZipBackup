@@ -33,6 +33,9 @@ public final class Settings {
     public static final ConfigValue<Integer> BACKUP_INTERVAL_WORLD =
             config -> config.getInteger("backup.world.interval", 60);
 
+    public static final ConfigValue<Boolean> BACKUP_WORLD_SAVE_BEFORE_BACKUP =
+            config -> config.getBoolean("backup.world.save-before-backup", true);
+
     public static final ConfigValue<Boolean> BACKUP_WORLD_AFTER_START_UP =
             config -> config.getBoolean("backup.world.backup-after-startup", true);
 

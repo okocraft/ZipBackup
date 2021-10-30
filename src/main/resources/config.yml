@@ -8,6 +8,7 @@ backup:
     exclude-folders: []
   world:
     interval: 60
+    save-before-backup: true
     backup-after-startup: true
     exclude-worlds: []
   purge:
