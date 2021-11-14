@@ -7,6 +7,7 @@ import net.lingala.zip4j.model.ZipParameters;
 import net.okocraft.zipbackup.ZipBackupPlugin;
 import net.okocraft.zipbackup.config.Settings;
 import net.okocraft.zipbackup.util.FilePathFactory;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -28,6 +29,10 @@ public class PluginBackupTask implements Runnable {
 
     @Override
     public void run() {
+        if (Bukkit.isStopping()) {
+            return;
+        }
+
         plugin.getLogger().info("Starting plugin backup task...");
         long start = System.currentTimeMillis();
 

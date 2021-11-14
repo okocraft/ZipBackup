@@ -29,6 +29,10 @@ public class WorldBackupTask implements Runnable {
 
     @Override
     public void run() {
+        if (Bukkit.isStopping()) {
+            return;
+        }
+
         plugin.getLogger().info("Starting world backup task...");
         long start = System.currentTimeMillis();
 

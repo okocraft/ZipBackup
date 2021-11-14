@@ -2,6 +2,7 @@ package net.okocraft.zipbackup.task.purge;
 
 import net.okocraft.zipbackup.ZipBackupPlugin;
 import net.okocraft.zipbackup.config.Settings;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class BackupPurgeTask implements Runnable {
 
     @Override
     public void run() {
-        if (!Files.exists(plugin.getBackupDirectory())) {
+        if (Bukkit.isStopping() || !Files.exists(plugin.getBackupDirectory())) {
             return;
         }
 
