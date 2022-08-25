@@ -2,7 +2,6 @@ package net.okocraft.zipbackup.task.backup;
 
 import com.github.siroshun09.configapi.api.util.FileUtils;
 import net.lingala.zip4j.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.okocraft.zipbackup.ZipBackupPlugin;
 import net.okocraft.zipbackup.config.Settings;
@@ -84,13 +83,12 @@ public class WorldBackupTask implements Runnable {
         }
 
         var zipPath = FilePathFactory.newBackupFile(directory);
-        var zip = new ZipFile(zipPath.toFile());
         var parameters = new ZipParameters(plugin.getZipParameters());
         parameters.setExcludeFileFilter(WorldBackupTask::shouldBeIgnored);
 
-        try {
+        try (var zip = new ZipFile(zipPath.toFile())) {
             zip.addFolder(world.getWorldFolder(), parameters);
-        } catch (ZipException exception) {
+        } catch (IOException exception) {
             plugin.getLogger().log(
                     Level.SEVERE,
                     "An error occurred while creating the backup (" + worldName + ")",
