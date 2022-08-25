@@ -15,4 +15,3 @@ backup:
     check-interval: 720
     purge-after-startup: true
     expiration-days: 7
-    maximum-files: 10
