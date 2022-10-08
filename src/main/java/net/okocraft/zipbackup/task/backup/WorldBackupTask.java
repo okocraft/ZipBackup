@@ -1,17 +1,13 @@
 package net.okocraft.zipbackup.task.backup;
 
-import com.github.siroshun09.configapi.api.util.FileUtils;
-import net.lingala.zip4j.ZipFile;
-import net.lingala.zip4j.model.ZipParameters;
 import net.okocraft.zipbackup.ZipBackupPlugin;
 import net.okocraft.zipbackup.config.Settings;
-import net.okocraft.zipbackup.util.FilePathFactory;
+import net.okocraft.zipbackup.type.BackupType;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
@@ -21,37 +17,20 @@ public class WorldBackupTask implements Runnable {
     private static final String OLD_FILE_SUFFIX = "_old";
 
     private final ZipBackupPlugin plugin;
+    private final World world;
 
-    public WorldBackupTask(@NotNull ZipBackupPlugin plugin) {
+    public WorldBackupTask(@NotNull ZipBackupPlugin plugin, @NotNull World world) {
         this.plugin = plugin;
+        this.world = world;
     }
 
     @Override
     public void run() {
-        if (Bukkit.isStopping()) {
-            return;
-        }
-
-        plugin.getLogger().info("Starting world backup task...");
-        long start = System.currentTimeMillis();
-
-        var excludedWorlds = plugin.getConfiguration().get(Settings.BACKUP_WORLD_EXCLUDE);
-
-        plugin.getServer().getWorlds()
-                .stream()
-                .filter(world -> !excludedWorlds.contains(world.getName()))
-                .forEach(this::backupWorld);
-
-        long end = System.currentTimeMillis();
-        plugin.getLogger().info("World backup task has been finished. (" + (end - start) + "ms)");
-    }
-
-    public void backupWorld(@NotNull World world) {
-        backupWorld(world, plugin);
-    }
-
-    public static void backupWorld(@NotNull World world, @NotNull ZipBackupPlugin plugin) {
         var worldName = world.getName();
+
+        plugin.getLogger().info("Starting backup task for world " + worldName);
+
+        long start = System.currentTimeMillis();
 
         if (plugin.getConfiguration().get(Settings.BACKUP_WORLD_SAVE_BEFORE_BACKUP)) {
             var mainThread = Bukkit.getScheduler().getMainThreadExecutor(plugin);
@@ -70,35 +49,32 @@ public class WorldBackupTask implements Runnable {
         }
 
         var directory = plugin.getBackupDirectory().resolve(worldName);
+        BackupType type;
+
+        if (plugin.getConfiguration().get(Settings.BACKUP_DIFFERENTIAL)) {
+            boolean checkFileContent = plugin.getConfiguration().get(Settings.BACKUP_CHECK_FILE_CONTENT);
+            type = BackupType.differential(plugin::getZipParameters, this::shouldBeIgnored, checkFileContent);
+        } else {
+            type = BackupType.full(plugin::getZipParameters, this::shouldBeIgnored);
+        }
 
         try {
-            FileUtils.createDirectoriesIfNotExists(directory);
-        } catch (IOException exception) {
+            type.backup(world.getWorldFolder().toPath(), directory);
+        } catch (Exception e) {
             plugin.getLogger().log(
                     Level.SEVERE,
-                    "An error occurred while creating the directory (" + directory + ")",
-                    exception
+                    "An error occurred while creating the backup (" + worldName + ")",
+                    e
             );
             return;
         }
 
-        var zipPath = FilePathFactory.newBackupFile(directory);
-        var parameters = new ZipParameters(plugin.getZipParameters());
-        parameters.setExcludeFileFilter(WorldBackupTask::shouldBeIgnored);
-
-        try (var zip = new ZipFile(zipPath.toFile())) {
-            zip.addFolder(world.getWorldFolder(), parameters);
-        } catch (IOException exception) {
-            plugin.getLogger().log(
-                    Level.SEVERE,
-                    "An error occurred while creating the backup (" + worldName + ")",
-                    exception
-            );
-        }
+        long end = System.currentTimeMillis();
+        plugin.getLogger().info("Backup task for world " + worldName + " has been finished. (" + (end - start) + "ms)");
     }
 
-    private static boolean shouldBeIgnored(@NotNull File file) {
-        var name = file.getName();
+    private boolean shouldBeIgnored(@NotNull Path file) {
+        var name = file.getFileName().toString();
         return name.equals(SESSION_FILE_NAME) || name.endsWith(OLD_FILE_SUFFIX);
     }
 }

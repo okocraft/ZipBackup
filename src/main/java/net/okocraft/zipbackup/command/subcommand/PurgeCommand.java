@@ -30,9 +30,9 @@ public class PurgeCommand extends AbstractCommand {
 
         sender.sendMessage(Messages.COMMAND_PURGE_START);
 
-        plugin.getTaskContainer()
-                .runPurgeTask()
-                .thenRun(() -> sender.sendMessage(Messages.COMMAND_PURGE_FINISH));
+        plugin.getTaskContainer().runPurgeTask().join();
+
+        sender.sendMessage(Messages.COMMAND_PURGE_FINISH);
 
         return CommandResult.SUCCESS;
     }

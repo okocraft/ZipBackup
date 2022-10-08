@@ -9,20 +9,28 @@ import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class TaskContainer {
 
     private final ZipBackupPlugin plugin;
     private ScheduledExecutorService scheduler;
+    private ExecutorService backupExecutors;
 
     public TaskContainer(@NotNull ZipBackupPlugin plugin) {
         this.plugin = plugin;
     }
 
     public void scheduleTasks() {
+        if (backupExecutors == null) {
+            backupExecutors = Executors.newFixedThreadPool(4);
+        }
+
         if (scheduler == null) {
             scheduler = Executors.newSingleThreadScheduledExecutor();
         }
@@ -31,7 +39,7 @@ public class TaskContainer {
 
         if (0 < purgeInterval) {
             scheduler.scheduleAtFixedRate(
-                    new BackupPurgeTask(plugin),
+                    this::runPurgeTask,
                     purgeInterval,
                     purgeInterval,
                     TimeUnit.MINUTES
@@ -42,7 +50,7 @@ public class TaskContainer {
 
         if (0 < worldBackupInterval) {
             scheduler.scheduleAtFixedRate(
-                    new WorldBackupTask(plugin),
+                    () -> runWorldBackupTask().forEach(task -> {}), // call terminal operations
                     worldBackupInterval,
                     worldBackupInterval,
                     TimeUnit.MINUTES
@@ -53,7 +61,7 @@ public class TaskContainer {
 
         if (0 < pluginBackupInterval) {
             scheduler.scheduleAtFixedRate(
-                    new PluginBackupTask(plugin),
+                    this::runPluginBackupTask,
                     pluginBackupInterval,
                     pluginBackupInterval,
                     TimeUnit.MINUTES
@@ -62,38 +70,43 @@ public class TaskContainer {
     }
 
     public @NotNull CompletableFuture<Void> runPurgeTask() {
-        return CompletableFuture.runAsync(new BackupPurgeTask(plugin), scheduler);
+        return runBackupTask(new BackupPurgeTask(plugin));
     }
 
     public @NotNull CompletableFuture<Void> runPluginBackupTask() {
-        return CompletableFuture.runAsync(new PluginBackupTask(plugin), scheduler);
+        return runBackupTask(new PluginBackupTask(plugin));
     }
 
-    public @NotNull CompletableFuture<Void> runWorldBackupTask() {
-        return CompletableFuture.runAsync(new WorldBackupTask(plugin), scheduler);
+    public @NotNull Stream<CompletableFuture<Void>> runWorldBackupTask() {
+        return createBackupTaskForAllWorlds().map(this::runBackupTask);
     }
 
     public @NotNull CompletableFuture<Void> runWorldBackupTask(@NotNull World world) {
-        return CompletableFuture.runAsync(
-                () -> {
-                    long start = System.currentTimeMillis();
-
-                    plugin.getLogger().info("Starting world backup task... (" + world.getName() + ")");
-                    WorldBackupTask.backupWorld(world, plugin);
-
-                    long finish = System.currentTimeMillis();
-                    long took = finish - start;
-
-                    plugin.getLogger().info("The world backup task has been finished. (" + took + "ms)");
-                },
-                scheduler
-        );
+        return runBackupTask(new WorldBackupTask(plugin, world));
     }
 
     public void shutdownIfRunning() {
+        if (backupExecutors != null && !backupExecutors.isShutdown()) {
+            backupExecutors.shutdownNow();
+            backupExecutors = null;
+        }
+
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdownNow();
             scheduler = null;
         }
+    }
+
+    private @NotNull Stream<WorldBackupTask> createBackupTaskForAllWorlds() {
+        var excludedWorlds = plugin.getConfiguration().get(Settings.BACKUP_WORLD_EXCLUDE);
+
+        return plugin.getServer().getWorlds()
+                .stream()
+                .filter(Predicate.not(world -> excludedWorlds.contains(world.getName())))
+                .map(world -> new WorldBackupTask(plugin, world));
+    }
+
+    private @NotNull CompletableFuture<Void> runBackupTask(@NotNull Runnable task) {
+        return CompletableFuture.runAsync(task, backupExecutors);
     }
 }

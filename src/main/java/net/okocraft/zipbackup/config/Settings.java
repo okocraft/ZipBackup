@@ -7,6 +7,12 @@ import java.util.List;
 
 public final class Settings {
 
+    public static final ConfigValue<Boolean> BACKUP_DIFFERENTIAL =
+            config -> config.getString("backup.type").equalsIgnoreCase("differential");
+
+    public static final ConfigValue<Boolean> BACKUP_CHECK_FILE_CONTENT =
+            config -> config.getBoolean("backup.differential.check-file-content", false);
+
     public static final ConfigValue<String> BACKUP_DIRECTORY = config -> config.getString("backup.directory");
 
     public static final ConfigValue<CompressionLevel> COMPRESSION_LEVEL =

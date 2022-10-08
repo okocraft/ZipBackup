@@ -1,21 +1,14 @@
 package net.okocraft.zipbackup.task.backup;
 
-import com.github.siroshun09.configapi.api.util.FileUtils;
-import net.lingala.zip4j.ZipFile;
-import net.lingala.zip4j.model.ExcludeFileFilter;
-import net.lingala.zip4j.model.ZipParameters;
 import net.okocraft.zipbackup.ZipBackupPlugin;
 import net.okocraft.zipbackup.config.Settings;
-import net.okocraft.zipbackup.util.FilePathFactory;
+import net.okocraft.zipbackup.type.BackupType;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 public class PluginBackupTask implements Runnable {
 
@@ -33,7 +26,7 @@ public class PluginBackupTask implements Runnable {
             return;
         }
 
-        plugin.getLogger().info("Starting plugin backup task...");
+        plugin.getLogger().info("Starting backup task for plugins...");
         long start = System.currentTimeMillis();
 
         var pluginDirectory = plugin.getDataFolder().getParentFile().toPath();
@@ -42,61 +35,55 @@ public class PluginBackupTask implements Runnable {
             return;
         }
 
-        var zipParameter = new ZipParameters(plugin.getZipParameters());
+        BackupType type;
 
-        zipParameter.setExcludeFileFilter(createFileFilter(pluginDirectory));
-
-        var zipPath = FilePathFactory.newBackupFile(directoryPathCache);
+        if (plugin.getConfiguration().get(Settings.BACKUP_DIFFERENTIAL)) {
+            boolean checkFileContent = plugin.getConfiguration().get(Settings.BACKUP_CHECK_FILE_CONTENT);
+            type = BackupType.differential(plugin::getZipParameters, this::shouldIgnore, checkFileContent);
+        } else {
+            type = BackupType.full(plugin::getZipParameters, this::shouldIgnore);
+        }
 
         try {
-            FileUtils.createDirectoriesIfNotExists(zipPath.getParent());
-        } catch (IOException exception) {
+            type.backup(pluginDirectory, directoryPathCache);
+        } catch (Exception e) {
             plugin.getLogger().log(
                     Level.SEVERE,
-                    "An error occurred while creating the directory (" + zipPath.getParent() + ")",
-                    exception
+                    "An error occurred while backing up to zip",
+                    e
             );
             return;
         }
 
-        try (var zipFile = new ZipFile(zipPath.toFile())) {
-            zipFile.addFolder(pluginDirectory.toFile(), zipParameter);
-        } catch (IOException exception) {
-            plugin.getLogger().log(
-                    Level.SEVERE,
-                    "An error occurred while backing up to zip",
-                    exception
-            );
-        }
-
         long end = System.currentTimeMillis();
-        plugin.getLogger().info("Plugin backup task has been finished. (" + (end - start) + "ms)");
+        plugin.getLogger().info("Backup task for plugins has been finished. (" + (end - start) + "ms)");
     }
 
-    private @NotNull ExcludeFileFilter createFileFilter(@NotNull Path pluginDir) {
-        var excludedSet =
-                plugin.getConfiguration().get(Settings.BACKUP_PLUGIN_EXCLUDE_FOLDERS)
-                        .stream()
-                        .map(pluginDir::resolve)
-                        .map(Path::toFile)
-                        .collect(Collectors.toSet());
+    private boolean shouldIgnore(@NotNull Path path) {
+        if (path.toAbsolutePath().startsWith(plugin.getBackupDirectory().toAbsolutePath())) {
+            return true;
+        }
 
-        excludedSet.add(plugin.getBackupDirectory().toFile());
+        var strPath = path.toString();
 
-        var shouldIgnoreJar = plugin.getConfiguration().get(Settings.BACKUP_PLUGIN_IGNORE_JAR_FILES);
+        if (strPath.startsWith("plugins/")) {
+            strPath = strPath.substring("plugins/".length());
+        }
 
-        return file -> {
-            for (File excluded : excludedSet) {
-                if (excluded.equals(file)) {
-                    return true;
-                }
+        if (strPath.startsWith("ZipBackup") && strPath.endsWith(".zip")) {
+            return true;
+        }
+
+        if (plugin.getConfiguration().get(Settings.BACKUP_PLUGIN_IGNORE_JAR_FILES) && strPath.endsWith(".jar")) {
+            return true;
+        }
+
+        for (var exclude : plugin.getConfiguration().get(Settings.BACKUP_PLUGIN_EXCLUDE_FOLDERS)) {
+            if (strPath.equals(exclude) || strPath.startsWith(exclude)) {
+                return true;
             }
+        }
 
-            if (shouldIgnoreJar) {
-                return file.getName().endsWith(".jar");
-            }
-
-            return false;
-        };
+        return false;
     }
 }

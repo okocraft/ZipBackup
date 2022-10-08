@@ -8,6 +8,7 @@ import com.github.siroshun09.mccommand.common.context.CommandContext;
 import com.github.siroshun09.mccommand.common.filter.StringFilter;
 import net.okocraft.zipbackup.ZipBackupPlugin;
 import net.okocraft.zipbackup.command.subcommand.BackupCommand;
+import net.okocraft.zipbackup.command.subcommand.CopyBackupCommand;
 import net.okocraft.zipbackup.command.subcommand.PurgeCommand;
 import net.okocraft.zipbackup.command.subcommand.ReloadCommand;
 import net.okocraft.zipbackup.message.Messages;
@@ -16,20 +17,25 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ZipBackupCommand extends AbstractCommand {
 
+    private final AtomicBoolean runningCommand = new AtomicBoolean(false);
+    private final ZipBackupPlugin plugin;
     private final SubCommandHolder subCommandHolder;
 
     public ZipBackupCommand(@NotNull ZipBackupPlugin plugin) {
         super("zipbackup", "zipbackup.command", Set.of("zb", "zbu", "zbackup"));
+        this.plugin = plugin;
         this.subCommandHolder =
                 SubCommandHolder.of(
                         new BackupCommand(plugin),
+                        new CopyBackupCommand(plugin),
                         new PurgeCommand(plugin),
                         new ReloadCommand(plugin)
                 );
+
     }
 
     @Override
@@ -39,6 +45,11 @@ public class ZipBackupCommand extends AbstractCommand {
         if (!sender.hasPermission(getPermission())) {
             sender.sendMessage(Messages.COMMAND_NO_PERMISSION.apply(getPermission()));
             return CommandResult.NO_PERMISSION;
+        }
+
+        if (runningCommand.get()) {
+            sender.sendMessage(Messages.COMMAND_CURRENTLY_RUNNING);
+            return CommandResult.STATE_ERROR;
         }
 
         var args = context.getArguments();
@@ -51,7 +62,14 @@ public class ZipBackupCommand extends AbstractCommand {
         var subCommand = subCommandHolder.search(args.get(0));
 
         if (subCommand != null) {
-            return subCommand.onExecution(context);
+            runningCommand.set(true);
+
+            plugin.getCommandExecutor().submit(() -> {
+                subCommand.onExecution(context);
+                runningCommand.set(false);
+            });
+
+            return CommandResult.SUCCESS; // dummy result
         } else {
             sender.sendMessage(Messages.COMMAND_USAGE);
             return CommandResult.INVALID_ARGUMENTS;
@@ -80,7 +98,7 @@ public class ZipBackupCommand extends AbstractCommand {
                     .filter(cmd -> sender.hasPermission(cmd.getPermission()))
                     .map(Command::getName)
                     .filter(StringFilter.startsWith(firstArgument))
-                    .collect(Collectors.toUnmodifiableList());
+                    .toList();
         }
 
         var subcommand = subCommandHolder.search(firstArgument);

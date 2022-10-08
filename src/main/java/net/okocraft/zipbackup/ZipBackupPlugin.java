@@ -4,15 +4,20 @@ import com.github.siroshun09.configapi.api.util.FileUtils;
 import com.github.siroshun09.configapi.api.util.ResourceUtils;
 import com.github.siroshun09.configapi.yaml.YamlConfiguration;
 import com.github.siroshun09.mccommand.paper.PaperCommandFactory;
+import com.github.siroshun09.mccommand.paper.listener.AsyncTabCompleteListener;
 import net.lingala.zip4j.model.ZipParameters;
 import net.okocraft.zipbackup.command.ZipBackupCommand;
 import net.okocraft.zipbackup.config.Settings;
 import net.okocraft.zipbackup.listener.ServerStartListener;
 import net.okocraft.zipbackup.task.TaskContainer;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 public class ZipBackupPlugin extends JavaPlugin {
@@ -21,6 +26,7 @@ public class ZipBackupPlugin extends JavaPlugin {
             YamlConfiguration.create(getDataFolder().toPath().resolve("config.yml"));
 
     private final TaskContainer taskContainer = new TaskContainer(this);
+    private final ExecutorService commandExecutor = Executors.newSingleThreadExecutor();
 
     private Path backupDirectory;
     private ZipParameters zipParameters;
@@ -40,12 +46,16 @@ public class ZipBackupPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new ServerStartListener(this), this);
 
-        PaperCommandFactory.registerAsyncIfExists(this, new ZipBackupCommand(this));
+        var command = new ZipBackupCommand(this);
+        PaperCommandFactory.registerIfExists(this, command);
+        AsyncTabCompleteListener.register(this, command);
     }
 
     @Override
     public void onDisable() {
+        HandlerList.unregisterAll(this);
         taskContainer.shutdownIfRunning();
+        commandExecutor.shutdownNow();
     }
 
     public void reload() throws Exception {
@@ -74,8 +84,13 @@ public class ZipBackupPlugin extends JavaPlugin {
         return backupDirectory;
     }
 
+    @Contract(" -> new")
     public @NotNull ZipParameters getZipParameters() {
-        return zipParameters;
+        return new ZipParameters(zipParameters);
+    }
+
+    public @NotNull ExecutorService getCommandExecutor() {
+        return commandExecutor;
     }
 
     private void prepareBackupDirectory() {

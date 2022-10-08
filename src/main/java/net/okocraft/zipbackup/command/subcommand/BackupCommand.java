@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 
 public class BackupCommand extends AbstractCommand {
 
@@ -76,7 +76,7 @@ public class BackupCommand extends AbstractCommand {
         if (arguments.size() == 2) {
             return SECOND_ARGUMENTS.stream()
                     .filter(StringFilter.startsWith(secondArgument))
-                    .collect(Collectors.toUnmodifiableList());
+                    .toList();
         }
 
         if (arguments.size() == 3 && secondArgument.equalsIgnoreCase("world")) {
@@ -84,7 +84,7 @@ public class BackupCommand extends AbstractCommand {
             return plugin.getServer().getWorlds().stream()
                     .map(World::getName)
                     .filter(StringFilter.startsWith(thirdArgument))
-                    .collect(Collectors.toUnmodifiableList());
+                    .toList();
         }
 
         return Collections.emptyList();
@@ -103,8 +103,9 @@ public class BackupCommand extends AbstractCommand {
     private @NotNull CommandResult backupPlugin(@NotNull Sender sender) {
         sender.sendMessage(Messages.COMMAND_BACKUP_PLUGIN_START);
 
-        plugin.getTaskContainer().runPluginBackupTask()
-                .thenRun(() -> sender.sendMessage(Messages.COMMAND_BACKUP_PLUGIN_FINISH));
+        plugin.getTaskContainer().runPluginBackupTask().join();
+
+        sender.sendMessage(Messages.COMMAND_BACKUP_PLUGIN_FINISH);
 
         return CommandResult.SUCCESS;
     }
@@ -115,7 +116,10 @@ public class BackupCommand extends AbstractCommand {
 
             plugin.getTaskContainer()
                     .runWorldBackupTask()
-                    .thenRun(() -> sender.sendMessage(Messages.COMMAND_BACKUP_WORLD_FINISH));
+                    .toList() // to create and run task before joining
+                    .forEach(CompletableFuture::join);
+
+            sender.sendMessage(Messages.COMMAND_BACKUP_WORLD_FINISH);
             return CommandResult.SUCCESS;
         }
 
@@ -126,9 +130,9 @@ public class BackupCommand extends AbstractCommand {
         if (world != null) {
             sender.sendMessage(Messages.COMMAND_BACKUP_WORLD_START);
 
-            plugin.getTaskContainer().runWorldBackupTask(world)
-                    .thenRun(() -> sender.sendMessage(Messages.COMMAND_BACKUP_WORLD_FINISH));
+            plugin.getTaskContainer().runWorldBackupTask(world).join();
 
+            sender.sendMessage(Messages.COMMAND_BACKUP_WORLD_FINISH);
             return CommandResult.SUCCESS;
         } else {
             sender.sendMessage(
