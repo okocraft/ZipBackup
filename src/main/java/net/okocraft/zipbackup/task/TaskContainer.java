@@ -8,6 +8,7 @@ import net.okocraft.zipbackup.task.purge.BackupPurgeTask;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,7 +51,8 @@ public class TaskContainer {
 
         if (0 < worldBackupInterval) {
             scheduler.scheduleAtFixedRate(
-                    () -> runWorldBackupTask().forEach(task -> {}), // call terminal operations
+                    () -> runWorldBackupTask().forEach(task -> {
+                    }), // call terminal operations
                     worldBackupInterval,
                     worldBackupInterval,
                     TimeUnit.MINUTES
@@ -102,11 +104,32 @@ public class TaskContainer {
 
         return plugin.getServer().getWorlds()
                 .stream()
-                .filter(Predicate.not(world -> excludedWorlds.contains(world.getName())))
+                .filter(Predicate.not(world -> isBackupDisabledWorld(excludedWorlds, world.getName())))
                 .map(world -> new WorldBackupTask(plugin, world));
     }
 
     private @NotNull CompletableFuture<Void> runBackupTask(@NotNull Runnable task) {
         return CompletableFuture.runAsync(task, backupExecutors);
+    }
+
+    private boolean isBackupDisabledWorld(@NotNull List<String> disabledWorldNameList, @NotNull String worldName) {
+        for (var disabled : disabledWorldNameList) {
+            if (disabled.equals(worldName)) {
+                return true;
+            }
+
+            if (!disabled.contains("*")) {
+                continue;
+            }
+
+            var matching = disabled.replace("*", "");
+
+            if ((disabled.charAt(0) == '*' && worldName.endsWith(matching)) ||
+                    (disabled.charAt(disabled.length() - 1) == '*' && worldName.startsWith(matching))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
