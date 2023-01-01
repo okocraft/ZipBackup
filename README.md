@@ -1,7 +1,7 @@
 # ZipBackup
 
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/okocraft/ZipBackup)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/okocraft/ZipBackup/Java%20CI)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/okocraft/ZipBackup/maven.yml?branch=master)
 ![GitHub](https://img.shields.io/github/license/okocraft/ZipBackup)
 
 ワールドやプラグインを自動でバックアップする Paper プラグインです。
@@ -81,4 +81,4 @@ backup:
 
 This project is under the GPL-3.0. Please see [LICENSE](LICENSE) for more info.
 
-Copyright © 2021, OKOCRAFT and Siroshun09
+Copyright © 2021-2023, OKOCRAFT and Siroshun09
