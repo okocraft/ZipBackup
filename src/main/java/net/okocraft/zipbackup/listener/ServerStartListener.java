@@ -7,9 +7,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class ServerStartListener implements Listener {
 
     private final ZipBackupPlugin plugin;
+    private final AtomicBoolean started = new AtomicBoolean();
 
     public ServerStartListener(@NotNull ZipBackupPlugin plugin) {
         this.plugin = plugin;
@@ -17,6 +20,10 @@ public class ServerStartListener implements Listener {
 
     @EventHandler
     public void onStarted(@NotNull ServerTickStartEvent event) {
+        if (started.getAndSet(true)) {
+            return;
+        }
+
         boolean backupPlugin = plugin.getConfiguration().get(Settings.BACKUP_PLUGIN_AFTER_START_UP);
 
         if (backupPlugin) {

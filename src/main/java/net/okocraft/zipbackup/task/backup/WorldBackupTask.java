@@ -3,6 +3,7 @@ package net.okocraft.zipbackup.task.backup;
 import net.okocraft.zipbackup.ZipBackupPlugin;
 import net.okocraft.zipbackup.config.Settings;
 import net.okocraft.zipbackup.type.BackupType;
+import net.okocraft.zipbackup.util.FoliaChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +33,7 @@ public class WorldBackupTask implements Runnable {
 
         long start = System.currentTimeMillis();
 
-        if (plugin.getConfiguration().get(Settings.BACKUP_WORLD_SAVE_BEFORE_BACKUP)) {
+        if (!FoliaChecker.isFolia() && plugin.getConfiguration().get(Settings.BACKUP_WORLD_SAVE_BEFORE_BACKUP)) { // Not supported yet on Folia
             var mainThread = Bukkit.getScheduler().getMainThreadExecutor(plugin);
             var saveTask = CompletableFuture.runAsync(world::save, mainThread);
 
